@@ -36,6 +36,25 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case IDC_BUTTON_ADD:
 			DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG_ADD), hwnd, DlgProcAdd, 0);
 			break;
+			
+			// Код для удаления элемента
+		case IDC_BUTTON_DELETE:
+		{
+			HWND hList = GetDlgItem(hwnd, IDC_LIST);
+			// Получаем индекс выбранного элемента
+			int selectedIndex = SendMessage(hList, LB_GETCURSEL, 0, 0);
+			// Если есть выбранный элемент
+			if (selectedIndex != LB_ERR)
+			{
+				// Удаляем элемент по индексу
+				SendMessage(hList, LB_DELETESTRING, selectedIndex, 0);
+			}
+			else
+			{
+				MessageBox(hwnd, "Выберите элемент для удаления", "Info", MB_OK | MB_ICONINFORMATION);
+			}
+			break;
+		}
 
 		case IDCANCEL:
 			EndDialog(hwnd, 0);
@@ -67,18 +86,20 @@ BOOL CALLBACK DlgProcAdd(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			HWND hParent = GetParent(hwnd);
 			HWND hList = GetDlgItem(hParent, IDC_LIST);
-			SendMessage(hList, LB_ADDSTRING, 0, (LPARAM)sz_buffer);
-			// Проверяем, существует ли элемент
+
+					// Проверяем, существует ли элемент
+			
 			if (SendMessage(hList, LB_FINDSTRINGEXACT, 0, (LPARAM)sz_buffer) == LB_ERR)
 			{
-				// Если элемент не найден, добавляем в список
+				// Если элемент не найден, добавляем его в список
 				SendMessage(hList, LB_ADDSTRING, 0, (LPARAM)sz_buffer);
 				EndDialog(hwnd, 0);
+			
 			}
 			else
 			{
 				MessageBox(hwnd, "Такой элемент уже добавлен", "Info", MB_OK | MB_ICONINFORMATION);
-
+			
 			}
 			break;
 		}
