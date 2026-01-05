@@ -1,5 +1,7 @@
 ﻿#undef UNICODE
+#define _CRT_SECURE_NO_WARNINGS
 #include<Windows.h>
+#include<stdio.h>
 
 CONST CHAR g_sz_CLASS_NAME[] = "Main Windoe PV_522";
 
@@ -28,14 +30,22 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 		MessageBox(NULL, "Class registration failed", NULL, MB_OK | MB_ICONERROR);
 		return 0;
 	}
+
+	INT screen_width = GetSystemMetrics(SM_CXSCREEN);
+	INT screen_height = GetSystemMetrics(SM_CYSCREEN);
+	INT window_width = screen_width * 3 / 4;
+	INT window_height = screen_height * 3 / 4;
+	INT window_start_x = screen_width / 8;
+	INT window_start_y = screen_height / 8;
+
 	HWND hwnd = CreateWindowEx
 	(
 		NULL,
 		g_sz_CLASS_NAME,
 		g_sz_CLASS_NAME,
 		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
+		window_start_x, window_start_y,
+		window_width, window_height,
 		NULL,
 		NULL,
 		hInstance,
@@ -63,6 +73,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		break;
+	case WM_SIZE:
+
+	case WM_MOVE:
+	{
+		RECT rect;
+		GetWindowRect(hwnd,&rect);
+		CHAR sz_title[MAX_PATH] = {};
+		sprintf(
+			sz_title, "%s - Position: %ix%i, Size: %ix%", 
+			g_sz_CLASS_NAME, rect.left, rect.top,
+			rect.right - rect.left, rect.bottom - rect.top
+		);
+		SendMessage(hwnd, WM_SETTEXT, 0, (LPARAM)sz_title);
+	}
 	case WM_COMMAND:
 		break;
 	case WM_DESTROY:
