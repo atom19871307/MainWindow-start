@@ -1,0 +1,8 @@
+Build started at 2:29...
+1>------ Build started: Project: WinAPI, Configuration: Debug Win32 ------
+1>mein.cpp
+1>C:\Users\mayil\source\repos\WinAPI\WinAPI\mein.cpp(32,12): warning C4244: 'initializing': conversion from 'double' to 'INT', possible loss of data
+1>C:\Users\mayil\source\repos\WinAPI\WinAPI\mein.cpp(33,12): warning C4244: 'initializing': conversion from 'double' to 'INT', possible loss of data
+1>Done building project "WinAPI.vcxproj".
+========== Build: 1 succeeded, 0 failed, 0 up-to-date, 0 skipped ==========
+========== Build completed at 2:29 and took 01,263 seconds ==========
