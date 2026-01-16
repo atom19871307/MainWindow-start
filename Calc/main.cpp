@@ -152,7 +152,7 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			CreateWindowEx
 			(
 				NULL, "Button", sz_operation,
-				WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+				WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_ICON,	 // Ավելացրինք BS_ICON
 				BUTTON_X_POSITION(3), BUTTON_Y_POSITION(i),
 				g_i_BUTTON_SIZE, g_i_BUTTON_SIZE,
 				hwnd,
@@ -160,12 +160,26 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				GetModuleHandle(NULL),
 				NULL
 				);
+			//////////////////////////////////////////////////
+			// Տեղադրում ենք Icon-ները օպերատորների համար
+			HICON hIconSlash = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON4));
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_SLASH), BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIconSlash);
+
+			HICON hIconMult = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON7)); // Ստուգեք ID-ն
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_ASTER), BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIconMult);
+
+			HICON hIconMinus = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON6)); // Ստուգեք ID-ն
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_MINUS), BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIconMinus);
+
+			HICON hIconPlus = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON5)); // Ստուգեք ID-ն
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_PLUS), BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIconPlus);
+			///////////////////////////////////////////////////
 		}
 		////////////////////////////////////////////////////////////////////////////////////////
 		CreateWindowEx
 		(
-			NULL, "Button", "<-",
-			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			NULL, "Button", "",
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_ICON,  // Ավելացրինք BS_ICON
 			BUTTON_X_POSITION(4), BUTTON_Y_POSITION(0),
 			g_i_BUTTON_SIZE, g_i_BUTTON_SIZE,
 			hwnd,
@@ -173,10 +187,15 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		/////////////////////////////////////////////////////////////////////////////
+		HICON hIconBsp = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+		SendMessage(GetDlgItem(hwnd, IDC_BUTTON_BSP), BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIconBsp);
+		////////////////////////////////////////////////////////////////////////////////
+
 		CreateWindowEx
 		(
-			NULL, "Button", "C",
-			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			NULL, "Button", "",
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON |BS_ICON,		// Ավելացրինք BS_ICON
 			BUTTON_X_POSITION(4), BUTTON_Y_POSITION(1),
 			g_i_BUTTON_SIZE, g_i_BUTTON_SIZE,
 			hwnd,
@@ -184,10 +203,14 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		//////////////////////////////////////////////////////////////////////////////
+		HICON hIconClr = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON2));
+		SendMessage(GetDlgItem(hwnd, IDC_BUTTON_CLR), BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIconClr);
+		/////////////////////////////////////////////////////////////////////////////////
 		CreateWindowEx
 		(
-			NULL, "Button", "=",
-			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			NULL, "Button", "",
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_ICON,		// Ավելացրինք BS_ICON
 			BUTTON_X_POSITION(4), BUTTON_Y_POSITION(2),
 			g_i_BUTTON_SIZE, g_i_DUBBLE_BUTTON_SIZE,
 			hwnd,
@@ -195,6 +218,10 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		//////////////////////////////////////////////////////////////////////////////
+		HICON hIconEqual = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON3));
+		SendMessage(GetDlgItem(hwnd, IDC_BUTTON_EQUAL), BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIconEqual);
+		/////////////////////////////////////////////////////////////////////////////
 	}
 		break;
 		//////////////////////////////////////////////////////////////////////////
@@ -245,6 +272,47 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			input_operation = FALSE;
 			SendMessage(hEditDisplay, WM_SETTEXT, 0, (LPARAM)"0");
 		}
+		
+		///////////////////////////////////////////////////////////////////////////////
+		// Проверяем, была ли нажата одна из кнопок арифметических операций (+, -, *, /)
+		if (LOWORD(wParam) >= IDC_BUTTON_PLUS && LOWORD(wParam) <= IDC_BUTTON_SLASH)
+		{
+			// Если пользователь в данный момент вводит число (есть активный ввод)
+			if (input)
+			{
+				// Если это самое первое число в цепочке вычислений (переменная 'a' еще пуста)
+				if (a == DBL_MIN)
+				{
+					// Преобразуем текст из дисплея в число и сохраняем как первое значение (a)
+					a = atof(sz_display);
+				}
+				else
+				{
+					// Если в 'a' уже есть значение, значит это следующее число (конвейер)
+					// Сохраняем текущее число из дисплея в переменную 'b'
+					b = atof(sz_display);
+					// Выполняем ПРЕДЫДУЩУЮ операцию, которую пользователь выбрал до этого
+					switch (operation)
+					{
+					case IDC_BUTTON_PLUS:  a += b; break;	// Сложение
+					case IDC_BUTTON_MINUS: a -= b; break;	// Вычитание
+					case IDC_BUTTON_ASTER: a *= b; break;	// Умножение
+					case IDC_BUTTON_SLASH: a /= b; break;	// Деление
+					}	
+					// Сразу форматируем результат вычисления обратно в строку
+					sprintf(sz_display, "%g", a);
+					// И отображаем промежуточный результат на экране калькулятора
+					SendMessage(hEditDisplay, WM_SETTEXT, 0, (LPARAM)sz_display);
+				}
+				// Сбрасываем флаг ввода, так как число обработано
+				input = FALSE;
+			}
+			// Сохраняем НОВУЮ операцию, которую нажал пользователь, чтобы выполнить её при следующем вводе
+			operation = LOWORD(wParam);
+			// Указываем системе, что была нажата кнопка операции
+			input_operation = TRUE;
+		}
+		/*//////////////////////////////////////////////////////////////
 		if (LOWORD(wParam) >= IDC_BUTTON_PLUS && LOWORD(wParam) <= IDC_BUTTON_SLASH)
 		{
 			if (input)
@@ -254,7 +322,7 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			operation = LOWORD(wParam);
 			input_operation = TRUE;
-		}
+		}*/
 		if (LOWORD(wParam) == IDC_BUTTON_EQUAL)
 		{
 			if (input)

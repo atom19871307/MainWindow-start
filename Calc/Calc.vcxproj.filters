@@ -29,4 +29,27 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon3.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon4.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon5.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon6.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon7.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
