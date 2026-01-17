@@ -26,7 +26,6 @@ CONST CHAR g_OPERATIONS[] = "+-*/";
 
 CONST CHAR g_sz_WINDOW_CLASS[] = "Calc PV_522";
 LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevinst, LPSTR lpCmdLine, INT nCmdShow)
 {
 	WNDCLASSEX wClass;
@@ -85,8 +84,8 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
-	case WM_CREATE:
-	{
+		case WM_CREATE:
+		{
 		//AllocConsole();
 		freopen("CONOUT$", "w", stdout);
 		HWND hEdit = CreateWindowEx
