@@ -26,6 +26,13 @@
 CONST CHAR g_OPERATIONS[] = "+-*/";
 
 CONST CHAR g_sz_WINDOW_CLASS[] = "Calc PV_522";
+//********************************************************************************************
+void SetButtonBitmap(HWND hParent, int id, const char* filename) 
+{
+	HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, filename, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	SendMessage(GetDlgItem(hParent, id), BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+}
+//********************************************************************************************
 LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, INT nCmdShow)
@@ -108,6 +115,9 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		);
 		//////////////////////////////////////////////////////////////////
 		CHAR sz_digit[2] = {};
+		//*************************************************************
+		CHAR sz_path[MAX_PATH] = {}; // <--- ԱՎԵԼԱՑՐՈՒ ԱՅՍ ՏՈՂԸ
+		//**********************************************************
 		for (int i = 6; i >= 0; i -= 3)
 		{
 			for (int j = 0; j < 3; j++)
@@ -116,7 +126,7 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				CreateWindowEx
 				(
 					NULL, "Button", sz_digit,
-					WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+					WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_BITMAP,//********************************
 					BUTTON_X_POSITION(j), BUTTON_Y_POSITION(2 - i / 3),
 					//g_i_BUTTON_START_X + (g_i_BUTTON_SIZE + g_i_INTERVAL)*j,//X-posistion
 					//g_i_BUTTON_START_Y + (g_i_BUTTON_SIZE + g_i_INTERVAL)*(2 - i / 3),
@@ -126,12 +136,17 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					GetModuleHandle(NULL),
 					NULL
 				);
+				//**************************************************************************************
+				// Ավելացրու այս երկու տողը նկարը բեռնելու համար.
+				sprintf(sz_path, "ButtonsBMP\\button_%c.bmp", sz_digit[0]);
+				SetButtonBitmap(hwnd, IDC_BUTTON_1 + i + j, sz_path);
+				//****************************************************************************************
 			}
 		}
 		HWND hButton0 = CreateWindowEx
 		(
 			NULL, "Button", "0",
-			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_BITMAP,
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_BITMAP | BS_BITMAP,  //  BS_BITMAP   **********************************
 			BUTTON_X_POSITION(0), BUTTON_Y_POSITION(3),
 			g_i_DOUBLE_BUTTON_SIZE, g_i_BUTTON_SIZE,
 			hwnd,
@@ -139,7 +154,8 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
-		HBITMAP bmpButton0 = (HBITMAP)LoadImage
+		SetButtonBitmap(hwnd, IDC_BUTTON_0, "ButtonsBMP\\button_0.bmp"); //*****************************************************
+	/*	HBITMAP bmpButton0 = (HBITMAP)LoadImage
 		(
 			GetModuleHandle(NULL),
 			"button_0.bmp",
@@ -147,11 +163,11 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			g_i_DOUBLE_BUTTON_SIZE, g_i_BUTTON_SIZE,
 			LR_LOADFROMFILE
 		);
-		SendMessage(hButton0, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmpButton0);
+		SendMessage(hButton0, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmpButton0);*/
 		CreateWindowEx
 		(
 			NULL, "Button", ".",
-			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_BITMAP, // Ավելացված է BS_BITMAP  //***********************************************
 			BUTTON_X_POSITION(2), BUTTON_Y_POSITION(3),
 			g_i_BUTTON_SIZE, g_i_BUTTON_SIZE,
 			hwnd,
@@ -159,15 +175,17 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		SetButtonBitmap(hwnd, IDC_BUTTON_POINT, "ButtonsBMP\\button_dot.bmp"); //*****************************************************
 		//////////////////////////////////////////////////////////////////
 		CHAR sz_operation[2] = {};
 		for (int i = 0; i < 4; i++)
 		{
 			sz_operation[0] = g_OPERATIONS[3 - i];
+			int buttonID = IDC_BUTTON_SLASH - i;//*************************************************************************************
 			CreateWindowEx
 			(
 				NULL, "Button", sz_operation,
-				WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+				WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_BITMAP, // Միշտ ավելացրու BS_BITMAP*****************************
 				BUTTON_X_POSITION(3), BUTTON_Y_POSITION(i),
 				g_i_BUTTON_SIZE, g_i_BUTTON_SIZE,
 				hwnd,
@@ -175,12 +193,19 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				GetModuleHandle(NULL),
 				NULL
 			);
+			//*********************************************************************************************************
+			// Այստեղ որոշում ենք, թե որ նկարը դնել ըստ ID-ի
+			if (buttonID == IDC_BUTTON_SLASH) SetButtonBitmap(hwnd, buttonID, "ButtonsBMP\\button_slash.bmp");
+			if (buttonID == IDC_BUTTON_ASTER) SetButtonBitmap(hwnd, buttonID, "ButtonsBMP\\button_aster.bmp");
+			if (buttonID == IDC_BUTTON_MINUS) SetButtonBitmap(hwnd, buttonID, "ButtonsBMP\\button_minus.bmp");
+			if (buttonID == IDC_BUTTON_PLUS)  SetButtonBitmap(hwnd, buttonID, "ButtonsBMP\\button_plus.bmp");
+			//**************************************************************************************************************
 		}
 		//////////////////////////////////////////////////////////////////
 		CreateWindowEx
 		(
 			NULL, "Button", "<-",
-			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_BITMAP, //**********************************************************
 			BUTTON_X_POSITION(4), BUTTON_Y_POSITION(0),
 			g_i_BUTTON_SIZE, g_i_BUTTON_SIZE,
 			hwnd,
@@ -188,10 +213,11 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		SetButtonBitmap(hwnd, IDC_BUTTON_BSP, "ButtonsBMP\\button_bsp.bmp");  //**********************************************
 		CreateWindowEx
 		(
 			NULL, "Button", "C",
-			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_BITMAP, //*************************************************************
 			BUTTON_X_POSITION(4), BUTTON_Y_POSITION(1),
 			g_i_BUTTON_SIZE, g_i_BUTTON_SIZE,
 			hwnd,
@@ -199,10 +225,12 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		//SetButtonBitmap(hwnd, IDC_BUTTON_BSP, "ButtonsBMP\\button_clr.bmp"); //**************************************************
+		SetButtonBitmap(hwnd, IDC_BUTTON_CLR, "ButtonsBMP\\button_clr.bmp");
 		CreateWindowEx
 		(
 			NULL, "Button", "=",
-			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_BITMAP, // *******************************************************************
 			BUTTON_X_POSITION(4), BUTTON_Y_POSITION(2),
 			g_i_BUTTON_SIZE, g_i_DOUBLE_BUTTON_SIZE,
 			hwnd,
@@ -210,6 +238,7 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		SetButtonBitmap(hwnd, IDC_BUTTON_EQUAL, "ButtonsBMP\\button_equal.bmp"); //***************************************************
 	}
 	break;
 	////////////////////////////////////////////////////////////////////////
