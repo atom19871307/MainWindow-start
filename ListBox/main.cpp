@@ -5,7 +5,7 @@
 CONST CHAR* g_sz_VALUES[] = { "This","is","my","first","List","Box" };
 int g_selectedIndex = -1;  // хранит индекс редактируемого элемента
 
-BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK DlgProcAdd(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK DlgProcEdit(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -15,7 +15,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPravInst, LPSTR lpCmdLine, IN
 	return 0;
 }
 
-BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
