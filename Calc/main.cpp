@@ -85,7 +85,6 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 
 	return msg.wParam;
 }
-
 LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -214,6 +213,24 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			NULL
 		);
 	SetSkin(hwnd, "square_blue");
+	}
+	break;
+	////////////////////////////////////////////////////////////////////////
+	case WM_CTLCOLOREDIT:
+	{
+		HDC hdc = (HDC)wParam; // Hendler to Device Context
+		// контекс уст
+		//
+		//
+		//
+		SetBkMode(hdc, OPAQUE);
+		SetBkColor(hdc, RGB(0, 0, 200));
+		SetTextColor(hdc, RGB(200, 200, 200));
+		HBRUSH hBackground = CreateSolidBrush(RGB(0, 0, 100));
+		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)hBackground);
+		//UpdateWindow(hwnd);
+		SendMessage(hwnd, WM_ERASEBKGND, wParam, 0);
+		return (LRESULT)hBackground;
 	}
 	break;
 	////////////////////////////////////////////////////////////////////////
