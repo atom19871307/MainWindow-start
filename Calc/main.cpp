@@ -26,6 +26,9 @@
 CONST CHAR g_OPERATIONS[] = "+-*/";
 CONST CHAR* g_SKINS[] = { "metal_mistral","square_blue" };
 
+COLORREF g_displayBkColor = RGB(255, 255, 255); //Цвет фона			Ֆոնի գույնը
+COLORREF g_displayTextColor = RGB(0, 0, 0);    //Цвет текста		Տեքստի գույնը
+
 CONST CHAR g_sz_WINDOW_CLASS[] = "Calc PV_522";
 LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -216,6 +219,7 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////
 	case WM_CTLCOLOREDIT:
 	{
 		HDC hdc = (HDC)wParam; // Hendler to Device Context
@@ -233,6 +237,23 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return (LRESULT)hBackground;
 	}
 	break;
+	////////////////////////////////////////////////////////////////////////
+	//case WM_CTLCOLOREDIT:
+	//{
+	//	HDC hdc = (HDC)wParam;	//Handler to Device Context.
+	//	//
+	//	//
+	//	//
+	//	//
+	//	SetBkColor(hdc, RGB(0, 0, 100));		
+	//	SetTextColor(hdc, RGB(200, 200, 200));	
+	//	HBRUSH hBackground = CreateSolidBrush(RGB(0, 0, 200));	
+	//	SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)hBackground);	
+	//	//UpdateWindow(hwnd);
+	//	SendMessage(hwnd, WM_ERASEBKGND, wParam, 0);	
+	//	return (LRESULT)hBackground;
+	//}
+	//break;
 	////////////////////////////////////////////////////////////////////////
 	case WM_COMMAND:
 	{
@@ -491,33 +512,33 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 VOID SetSkin(HWND hwnd,CONST CHAR sz_skin [])
 {
+	// 1. Գույների սահմանում՝ կախված սկինից
+	if (strcmp(sz_skin, "metal_mistral") == 0)
+	{
+		g_displayBkColor = RGB(45, 45, 48);   // Մուգ մոխրագույն
+		g_displayTextColor = RGB(0, 255, 0);  // Կանաչ (Matrix ոճի)
+	}
+	else if (strcmp(sz_skin, "square_blue") == 0)
+	{
+		g_displayBkColor = RGB(0, 0, 139);    // Մուգ կապույտ
+		g_displayTextColor = RGB(255, 255, 255); // Սպիտակ
+	}
+
+	// 2. Կոճակների նկարների բեռնում (քո բնօրինակ կոդը)
 	CONST CHAR* sz_NAMES[] =
 	{
-		"button_0",
-		"button_1",
-		"button_2",
-		"button_3",
-		"button_4",
-		"button_5",
-		"button_6",
-		"button_7",
-		"button_8",
-		"button_9",
-		"button_point",
-		"button_plus",
-		"button_minus",
-		"button_aster",
-		"button_slash",
-		"button_bsp",
-		"button_clr",
-		"button_equal"
+		"button_0", "button_1", "button_2", "button_3",
+		"button_4", "button_5", "button_6", "button_7",
+		"button_8", "button_9", "button_point", "button_plus",
+		"button_minus", "button_aster", "button_slash",
+		"button_bsp", "button_clr", "button_equal"
 	};
 	for (int i = 0; i < sizeof(sz_NAMES)/sizeof(sz_NAMES[0]); i++)
 	{
 		HWND hButton = GetDlgItem(hwnd, IDC_BUTTON_0 + i);
 		CHAR sz_filename[MAX_PATH] = {};
 		sprintf(sz_filename, "ButtonsBMP\\%s\\%s.bmp", sz_skin, sz_NAMES[i]);
-		//sprintf(sz_filename, "ButtonsBMP\\%s\\button_%i.bmp", sz_skin, i);
+
 		HBITMAP bmpButton = (HBITMAP)LoadImage
 		(
 			GetModuleHandle(NULL),
@@ -529,4 +550,7 @@ VOID SetSkin(HWND hwnd,CONST CHAR sz_skin [])
 		);
 		SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmpButton);
 	}
+
+	// 3. Էկրանի (Edit control) թարմացում, որպեսզի գույները անմիջապես փոխվեն
+	InvalidateRect(GetDlgItem(hwnd, IDC_DISPLAY), NULL, TRUE);
 }
