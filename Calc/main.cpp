@@ -13,7 +13,9 @@
 #define g_i_START_X					10
 #define g_i_START_Y					10
 #define g_i_DISPLAY_WIDTH			g_i_BUTTON_SIZE*5 + g_i_INTERVAL*4
-#define g_i_DISPLAY_HEIGHT			22
+#define g_i_DISPLAY_HEIGHT			g_i_BUTTON_SIZE
+#define g_i_FONT_HEIGHT				(g_i_DISPLAY_HEIGHT-2)
+#define g_i_FONT_WIDTH				g_i_FONT_HEIGHT/2.5
 #define g_i_BUTTON_START_X			g_i_START_X
 #define g_i_BUTTON_START_Y			g_i_START_Y + g_i_DISPLAY_HEIGHT + g_i_INTERVAL
 
@@ -24,15 +26,23 @@
 #define BUTTON_Y_POSITION(SHIFT)	g_i_BUTTON_START_Y + (g_i_BUTTON_SIZE+g_i_INTERVAL)*(SHIFT)
 
 CONST CHAR g_OPERATIONS[] = "+-*/";
-CONST CHAR* g_SKINS[] = { "metal_mistral", "square_blue" };
+enum Skin { SquareBlue,MetalMistral };
+enum Color { MainBackgroud, DisplayBackground, Font };
+CONST CHAR* g_SKINS[] = { "square_blue", "metal_mistral" };
+CONST COLORREF g_COLORS[2][3] =
+{
+	{ RGB(0,0,200), RGB(0,0,100), RGB(200,200,200) },
+	{ RGB(100,100,100), RGB(50,50,50), RGB(50,200,50) },
+};
 
 CONST CHAR g_sz_WINDOW_CLASS[] = "Calc PV_522";
 LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 VOID SetSkin(HWND hwnd, CONST CHAR sz_skin[]);
+VOID SetSkinFromDLL(HWND hwnd, CONST CHAR sz_skin[]);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, INT nCmdShow)
 {
-	//1) Ðåãèñòðàöèÿ êëàññà îêíà:
+	//1)
 	WNDCLASSEX wClass;
 	ZeroMemory(&wClass, sizeof(wClass));
 
@@ -57,7 +67,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 		return 0;
 	}
 
-	//2) Ñîçäàíèå îêíà:
+	//2)
 	HWND hwnd = CreateWindowEx
 	(
 		NULL,	//ExStyle
@@ -74,7 +84,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
 
-	//3) Çàïóñê öèêëà ñîîáùåíèé:
+	//3)
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{
@@ -87,6 +97,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 
 LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	static Skin skin = Skin::SquareBlue;
+	static HFONT hFont = NULL;
 	switch (uMsg)
 	{
 	case WM_CREATE:
@@ -108,7 +120,26 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
-		//////////////////////////////////////////////////////////////////
+		AddFontResourceEx("Fonts\\digital-7 (mono).ttf", FR_PRIVATE, 0);
+		//https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createfonta
+		hFont = CreateFont
+		(
+			g_i_FONT_HEIGHT, g_i_FONT_WIDTH,
+			0,0,500,
+			FALSE,FALSE,FALSE,
+			DEFAULT_CHARSET,
+			OUT_DEFAULT_PRECIS
+			CLIP_DEFAULT_PRECIS,
+			ANTIALIASED_QUALITY,
+			DEFAULT_PITCH,
+			"Digital-7 Mono"
+			//"DS-Digital"
+		);
+		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+		//DeleteObject(hFont);
+		//hFont = NULL;
+
+		///////////////////////////////////////////////////////////////////////////////////////
 		CHAR sz_digit[2] = {};
 		for (int i = 6; i >= 0; i -= 3)
 		{
@@ -219,14 +250,17 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	////////////////////////////////////////////////////////////////////////
 	case WM_CTLCOLOREDIT:
 	{
-		HDC hdc = (HDC)wParam;	//Handler to Device Context.
+		HDC hdc = (HDC)wParam;	//Handle to Device Context.
 		//Êîíòåêñò óñòðîéñòâà - ýòî íàáîð ðåñóðñîâ, ïðèâÿçàííûõ ê îïðåäåëåííîìó êñòðîéñòâó,
 		//ïîçâîëÿþùèé ïðèìåíÿòü â ýòîìó óñòðîéñòâó ãðàôè÷åñêèå ôóíêöèè.
 		//Â ÎÑ Windows àáñîëþòíî äëÿ ëþáîãî îêíà ìîæíî ïîëó÷èòü êîíòåêñò óñòðîéñòâà ïðè ïîìîùè ôóíêöèè GetDC(HWND
 		//SetBkMode(hdc, OPAQUE);	//Çàäàåì íåïðîçðà÷èíûé ðåæèì îòîáðàæåíèÿ hEditDisplay.
-		SetBkColor(hdc, RGB(0, 0, 100));		//Çàäàåò öâåò ôîíà äëÿ EditControl
+		HBRUSH hBackground = CreateSolidBrush(g_COLORS[skin][Color::MainBackgroud]);
+		SetBkColor(hdc, g_COLORS[skin][Color::DisplayBackground]);
+		SetTextColor(hdc, g_COLORS[skin][Color::Font]);
+		/*SetBkColor(hdc, RGB(0, 0, 100));		//Çàäàåò öâåò ôîíà äëÿ EditControl
 		SetTextColor(hdc, RGB(200, 200, 200));	//Çàäàåò öâåò òóêñòà äëÿ EditControl
-		HBRUSH hBackground = CreateSolidBrush(RGB(0, 0, 200));	//Ñîçäàì êèñòü äëÿ òîãî ÷òîáû ïîêðàñèòü ãëàâíîå îêíî.
+		HBRUSH hBackground = CreateSolidBrush(RGB(0, 0, 200));*/	//Ñîçäàì êèñòü äëÿ òîãî ÷òîáû ïîêðàñèòü ãëàâíîå îêíî.
 		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)hBackground);	//Ïîäìåíÿåì öâåò ôîíà â êëàññå ãëàâíîãî îêíà.
 		//UpdateWindow(hwnd);
 		SendMessage(hwnd, WM_ERASEBKGND, wParam, 0);	//Óáèðàåì ñòàðûé ôîí ñ ãëàâíîãî îêíà.
@@ -476,10 +510,17 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case IDR_EXIT:			SendMessage(hwnd, WM_CLOSE, 0, 0);
 		}
 		DestroyMenu(hMenu);
+		skin = Skin(item - IDR_SQUARE_BLUE);
+		HWND hEditDisplay = GetDlgItem(hwnd, IDC_DISPLAY);
+		HDC hdc = GetDC(hwnd);
+		SendMessage(hwnd, WM_CTLCOLOREDIT, (WPARAM)hdc, (LPARAM)hEditDisplay);
+		ReleaseDC(hwnd, hdc);
+		SetFocus(hEditDisplay);
 	}
 	break;
 	case WM_DESTROY:
 		FreeConsole();
+		DeleteObject(hFont);
 		PostQuitMessage(0);
 		break;
 	case WM_CLOSE:
@@ -528,4 +569,23 @@ VOID SetSkin(HWND hwnd, CONST CHAR sz_skin[])
 		);
 		SendMessage(hButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmpButton);
 	}
+}
+VOID SetSkinFromDLL(HWND hwnd, CONST CHAR sz_skin[])
+{
+	//Implementation
+	HINSTANCE hSkin = LoadLibrary(sz_skin);
+	for (int i = IDC_BUTTON_0; i <= IDC_BUTTON_EQUAL; i++)
+	{
+		HBITMAP bmpButton = (HBITMAP)LoadImage
+		(
+			hSkin,
+			MAKEINTRESOURCE(i),
+			IMAGE_BITMAP,
+			i > IDC_BUTTON_0 ? g_i_BUTTON_SIZE : g_i_DOUBLE_BUTTON_SIZE,
+			i < IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE : g_i_DOUBLE_BUTTON_SIZE,
+			LR_SHARED
+		);
+		SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmpButton);
+	}
+	FreeLibrary(hSkin);
 }
