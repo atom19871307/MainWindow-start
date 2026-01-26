@@ -32,7 +32,7 @@ CONST CHAR* g_SKINS[] = { "square_blue", "metal_mistral" };
 CONST COLORREF g_COLORS[2][3] =
 {
 	{ RGB(0,0,200), RGB(0,0,100), RGB(200,200,200) },
-	{ RGB(100,100,100), RGB(50,50,50), RGB(50,200,50) },
+	{ RGB(150,150,150), RGB(192,192,192), RGB(0,0,0) },
 };
 
 CONST CHAR g_sz_WINDOW_CLASS[] = "Calc PV_522";
@@ -128,7 +128,7 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			0,0,500,
 			FALSE,FALSE,FALSE,
 			DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS
+			OUT_DEFAULT_PRECIS,
 			CLIP_DEFAULT_PRECIS,
 			ANTIALIASED_QUALITY,
 			DEFAULT_PITCH,
@@ -244,27 +244,26 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
-		SetSkin(hwnd, "square_blue");
+		SetSkinFromDLL(hwnd, "square_blue");
 	}
 	break;
 	////////////////////////////////////////////////////////////////////////
 	case WM_CTLCOLOREDIT:
 	{
-		HDC hdc = (HDC)wParam;	//Handle to Device Context.
-		//Êîíòåêñò óñòðîéñòâà - ýòî íàáîð ðåñóðñîâ, ïðèâÿçàííûõ ê îïðåäåëåííîìó êñòðîéñòâó,
-		//ïîçâîëÿþùèé ïðèìåíÿòü â ýòîìó óñòðîéñòâó ãðàôè÷åñêèå ôóíêöèè.
-		//Â ÎÑ Windows àáñîëþòíî äëÿ ëþáîãî îêíà ìîæíî ïîëó÷èòü êîíòåêñò óñòðîéñòâà ïðè ïîìîùè ôóíêöèè GetDC(HWND
-		//SetBkMode(hdc, OPAQUE);	//Çàäàåì íåïðîçðà÷èíûé ðåæèì îòîáðàæåíèÿ hEditDisplay.
-		HBRUSH hBackground = CreateSolidBrush(g_COLORS[skin][Color::MainBackgroud]);
+		HDC hdc = (HDC)wParam;
+		// Ստեղծում ենք կիստ (brush) հիմնական ֆոնի գույնով
+		static HBRUSH hBackground = NULL;
+		if (hBackground) DeleteObject(hBackground); // Մաքրում ենք հինը
+
+		hBackground = CreateSolidBrush(g_COLORS[skin][Color::MainBackgroud]);
+
 		SetBkColor(hdc, g_COLORS[skin][Color::DisplayBackground]);
 		SetTextColor(hdc, g_COLORS[skin][Color::Font]);
-		/*SetBkColor(hdc, RGB(0, 0, 100));		//Çàäàåò öâåò ôîíà äëÿ EditControl
-		SetTextColor(hdc, RGB(200, 200, 200));	//Çàäàåò öâåò òóêñòà äëÿ EditControl
-		HBRUSH hBackground = CreateSolidBrush(RGB(0, 0, 200));*/	//Ñîçäàì êèñòü äëÿ òîãî ÷òîáû ïîêðàñèòü ãëàâíîå îêíî.
-		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)hBackground);	//Ïîäìåíÿåì öâåò ôîíà â êëàññå ãëàâíîãî îêíà.
-		//UpdateWindow(hwnd);
-		SendMessage(hwnd, WM_ERASEBKGND, wParam, 0);	//Óáèðàåì ñòàðûé ôîí ñ ãëàâíîãî îêíà.
-		return (LRESULT)hBackground;
+
+		// Սա փոխում է հիմնական պատուհանի ֆոնը
+		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)hBackground);
+
+		return (LRESULT)CreateSolidBrush(g_COLORS[skin][Color::DisplayBackground]); // Վերադարձնում ենք էկրանի ֆոնի գույնը
 	}
 	break;
 	////////////////////////////////////////////////////////////////////////
@@ -505,12 +504,24 @@ LRESULT WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		);
 		switch (item)
 		{
-		case IDR_SQUARE_BLUE:	SetSkin(hwnd, "square_blue");	break;
-		case IDR_METAL_MISTRAL: SetSkin(hwnd, "metal_mistral");	break;
-		case IDR_EXIT:			SendMessage(hwnd, WM_CLOSE, 0, 0);
+		case IDR_SQUARE_BLUE:
+			SetSkinFromDLL(hwnd, "square_blue.dll"); // Այստեղ արդեն DLL-ից է քաշում
+			skin = SquareBlue;
+			break;
+		case IDR_METAL_MISTRAL:
+			SetSkinFromDLL(hwnd, "metal_mistral.dll");
+			skin = MetalMistral;
+			break;
+		case IDR_EXIT:
+			SendMessage(hwnd, WM_CLOSE, 0, 0);
+			return 0;
 		}
 		DestroyMenu(hMenu);
-		skin = Skin(item - IDR_SQUARE_BLUE);
+		// --- ԱՎԵԼԱՑՐՈՒ ԱՅՍ ՏՈՂԵՐԸ ԱՅՍՏԵՂ ---
+		InvalidateRect(hwnd, NULL, TRUE); // Ամբողջ պատուհանը նշում է որպես վերանկարման ենթակա
+		UpdateWindow(hwnd);               // Անմիջապես կանչում է WM_PAINT / WM_CTLCOLOREDIT
+		// ----------------------------------
+		//skin = Skin(item - IDR_SQUARE_BLUE);
 		HWND hEditDisplay = GetDlgItem(hwnd, IDC_DISPLAY);
 		HDC hdc = GetDC(hwnd);
 		SendMessage(hwnd, WM_CTLCOLOREDIT, (WPARAM)hdc, (LPARAM)hEditDisplay);
@@ -572,20 +583,41 @@ VOID SetSkin(HWND hwnd, CONST CHAR sz_skin[])
 }
 VOID SetSkinFromDLL(HWND hwnd, CONST CHAR sz_skin[])
 {
-	//Implementation
-	HINSTANCE hSkin = LoadLibrary(sz_skin);
+	// Ավելացնում ենք .dll վերջավորությունը, եթե չկա
+	CHAR sz_dll_name[MAX_PATH];
+	sprintf(sz_dll_name, "%s", sz_skin);
+
+	// Բեռնում ենք DLL-ը որպես resource
+	HINSTANCE hSkin = LoadLibraryEx(sz_dll_name, NULL, 0);
+
+	if (hSkin == NULL) {
+		MessageBox(hwnd, "Could not load skin DLL", "Error", MB_OK);
+		return;
+	}
+
 	for (int i = IDC_BUTTON_0; i <= IDC_BUTTON_EQUAL; i++)
 	{
-		HBITMAP bmpButton = (HBITMAP)LoadImage
-		(
+		// Որոշում ենք կոճակի չափսերը
+		int width = (i == IDC_BUTTON_0) ? g_i_DOUBLE_BUTTON_SIZE : g_i_BUTTON_SIZE;
+		int height = (i == IDC_BUTTON_EQUAL) ? g_i_DOUBLE_BUTTON_SIZE : g_i_BUTTON_SIZE;
+
+		// 2. Բեռնում ենք նկարը DLL-ից՝ օգտագործելով ճիշտ ID-ն (101-ից սկսած)
+		HBITMAP bmpButton = (HBITMAP)LoadImage(
 			hSkin,
-			MAKEINTRESOURCE(i),
+			MAKEINTRESOURCE(101+(i-IDC_BUTTON_0)), // DLL-ի ներսի ID-ն
 			IMAGE_BITMAP,
-			i > IDC_BUTTON_0 ? g_i_BUTTON_SIZE : g_i_DOUBLE_BUTTON_SIZE,
-			i < IDC_BUTTON_EQUAL ? g_i_BUTTON_SIZE : g_i_DOUBLE_BUTTON_SIZE,
-			LR_SHARED
+			width,
+			height,
+			LR_DEFAULTCOLOR
 		);
-		SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmpButton);
+
+		// 3. Եթե նկարը բեռնվել է, դնում ենք կոճակի վրա
+		if (bmpButton) {
+			SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmpButton);
+		}
 	}
-	FreeLibrary(hSkin);
+
+	// ՈՒՇԱԴՐՈՒԹՅՈՒՆ: FreeLibrary չենք անում անմիջապես, 
+	// քանի որ նկարները կարող են անհետանալ: 
+	// Ավելի լավ է պահել HINSTANCE-ը որպես static կամ գլոբալ:
 }

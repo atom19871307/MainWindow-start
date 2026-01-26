@@ -15,6 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ListBox", "ListBox\ListBox.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Calc", "Calc\Calc.vcxproj", "{80D3494C-3FCF-4211-AEBD-7564181D74BE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Resource-onlyDLL", "..\PV_522_WIN\WinAPI\Resource-onlyDLL\Resource-onlyDLL.vcxproj", "{AC90157A-A738-48F2-B711-B1CAC88B364A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "metal_mistral", "..\metal_mistral\metal_mistral\metal_mistral.vcxproj", "{9A797066-B9F5-463A-B20B-0ED0112DCDAF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -71,6 +75,22 @@ Global
 		{80D3494C-3FCF-4211-AEBD-7564181D74BE}.Release|x64.Build.0 = Release|x64
 		{80D3494C-3FCF-4211-AEBD-7564181D74BE}.Release|x86.ActiveCfg = Release|Win32
 		{80D3494C-3FCF-4211-AEBD-7564181D74BE}.Release|x86.Build.0 = Release|Win32
+		{AC90157A-A738-48F2-B711-B1CAC88B364A}.Debug|x64.ActiveCfg = Debug|x64
+		{AC90157A-A738-48F2-B711-B1CAC88B364A}.Debug|x64.Build.0 = Debug|x64
+		{AC90157A-A738-48F2-B711-B1CAC88B364A}.Debug|x86.ActiveCfg = Debug|Win32
+		{AC90157A-A738-48F2-B711-B1CAC88B364A}.Debug|x86.Build.0 = Debug|Win32
+		{AC90157A-A738-48F2-B711-B1CAC88B364A}.Release|x64.ActiveCfg = Release|x64
+		{AC90157A-A738-48F2-B711-B1CAC88B364A}.Release|x64.Build.0 = Release|x64
+		{AC90157A-A738-48F2-B711-B1CAC88B364A}.Release|x86.ActiveCfg = Release|Win32
+		{AC90157A-A738-48F2-B711-B1CAC88B364A}.Release|x86.Build.0 = Release|Win32
+		{9A797066-B9F5-463A-B20B-0ED0112DCDAF}.Debug|x64.ActiveCfg = Debug|x64
+		{9A797066-B9F5-463A-B20B-0ED0112DCDAF}.Debug|x64.Build.0 = Debug|x64
+		{9A797066-B9F5-463A-B20B-0ED0112DCDAF}.Debug|x86.ActiveCfg = Debug|Win32
+		{9A797066-B9F5-463A-B20B-0ED0112DCDAF}.Debug|x86.Build.0 = Debug|Win32
+		{9A797066-B9F5-463A-B20B-0ED0112DCDAF}.Release|x64.ActiveCfg = Release|x64
+		{9A797066-B9F5-463A-B20B-0ED0112DCDAF}.Release|x64.Build.0 = Release|x64
+		{9A797066-B9F5-463A-B20B-0ED0112DCDAF}.Release|x86.ActiveCfg = Release|Win32
+		{9A797066-B9F5-463A-B20B-0ED0112DCDAF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
